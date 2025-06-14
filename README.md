@@ -1,61 +1,300 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Todo List API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## Getting Started
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Prerequisites
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* PHP >= 8.1
+* Composer
+* A database (e.g., MySQL, PostgreSQL, SQLite)
+* Laravel Valet, Docker, or a local PHP development server
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Installation and Setup
 
-## Learning Laravel
+1. **Clone the repository:**
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+git clone <your-repository-url>
+cd todo-api
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2. **Install PHP dependencies:**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer install
+```
 
-## Laravel Sponsors
+3. **Create your environment file:**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+cp .env.example .env
+```
 
-### Premium Partners
+4. **Generate an application key:**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+php artisan key:generate
+```
 
-## Contributing
+5. **Configure your database:**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Open the `.env` file and update the `DB_*` variables with your database credentials.
 
-## Code of Conduct
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=todo_app
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. **Run the database migrations:**
 
-## Security Vulnerabilities
+```bash
+php artisan migrate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+7. **Start the local server:**
 
-## License
+```bash
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The API will be available at `http://127.0.0.1:8000`.
+
+---
+
+## API Documentation
+
+All API requests must include the following headers:
+
+```http
+Accept: application/json
+Content-Type: application/json
+```
+
+**Base URL:**
+`http://127.0.0.1:8000/api`
+
+---
+
+### 1. Create a New Todo
+
+* **Method:** `POST`
+* **Endpoint:** `/todos`
+* **Description:** Store a newly created todo.
+
+#### Request Body Example
+
+```json
+{
+    "title": "My First Todo",
+    "assignee": "Angger Ari",
+    "due_date": "2025-09-15",
+    "priority": "high",
+    "status": "pending",
+    "time_tracked": 0
+}
+```
+
+#### Success Response (201 Created)
+
+```json
+{
+    "data": {
+        "id": 1,
+        "title": "My First Todo",
+        "assignee": "Angger Ari",
+        "dueDate": "2025-09-15",
+        "status": "pending",
+        "priority": "high",
+        "timeTracked": 0,
+        "createdAt": "2025-06-14T10:30:00.000000Z",
+        "updatedAt": "2025-06-14T10:30:00.000000Z"
+    }
+}
+```
+
+#### Validation Error (422 Unprocessable Entity)
+
+```json
+{
+    "message": "The due date cannot be in the past.",
+    "errors": {
+        "title": ["A title is required to create a new todo."],
+        "due_date": ["The due date cannot be in the past."]
+    }
+}
+```
+
+---
+
+### 2. Get Todo List (Paginated)
+
+* **Method:** `GET`
+* **Endpoint:** `/todos`
+* **Description:** Retrieve a paginated list of todos.
+
+#### Query Parameters
+
+| Parameter | Type   | Description             |
+| --------- | ------ | ----------------------- |
+| page      | Int    | Page number             |
+| status    | String | Filter by todo status   |
+| priority  | String | Filter by todo priority |
+
+#### Example Request
+
+```http
+GET /todos?page=2&status=pending&priority=high
+```
+
+#### Success Response (200 OK)
+
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "title": "My First Todo",
+            "assignee": "Angger Ari"
+        }
+    ],
+    "links": {
+        "first": "http://127.0.0.1:8000/api/todos?page=1",
+        "last": "http://127.0.0.1:8000/api/todos?page=5",
+        "prev": null,
+        "next": "http://127.0.0.1:8000/api/todos?page=2"
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 5,
+        "per_page": 15,
+        "to": 15,
+        "total": 75
+    }
+}
+```
+
+---
+
+### 3. Export Todos to Excel
+
+* **Method:** `GET`
+* **Endpoint:** `/todos/export`
+* **Description:** Export todos to Excel with filtering.
+
+#### Available Filters
+
+| Parameter   | Type   | Description                             |
+| ----------- | ------ | --------------------------------------- |
+| title       | String | Partial match on title                  |
+| assignee    | String | Filter by assignee(s) (comma-separated) |
+| status      | String | Filter by status (comma-separated)      |
+| priority    | String | Filter by priority (comma-separated)    |
+| start\_date | Date   | Filter by due\_date start (YYYY-MM-DD)  |
+| end\_date   | Date   | Filter by due\_date end (YYYY-MM-DD)    |
+| min         | Int    | Minimum time\_tracked value             |
+| max         | Int    | Maximum time\_tracked value             |
+
+#### Example Request
+
+```http
+GET /todos/export?title=Test&assignee=John,Doe&status=pending,in_progress&priority=low,high&start_date=2025-01-01&end_date=2025-12-31&min=10&max=100
+```
+
+#### Response
+
+* Triggers Excel file download (e.g., `todos_report_2025-06-14_10-45.xlsx`).
+
+---
+
+### 4. Get Chart Data
+
+* **Method:** `GET`
+* **Endpoint:** `/chart`
+* **Description:** Retrieve aggregated data for charts.
+
+#### Query Parameter
+
+| Parameter | Type   | Rules                                                |
+| --------- | ------ | ---------------------------------------------------- |
+| type      | String | Required. Must be one of: status, priority, assignee |
+
+#### Example Requests & Responses
+
+**By Status**
+
+```http
+GET /chart?type=status
+```
+
+```json
+{
+    "status_summary": {
+        "pending": 15,
+        "open": 0,
+        "in_progress": 5,
+        "completed": 22
+    }
+}
+```
+
+**By Priority**
+
+```http
+GET /chart?type=priority
+```
+
+```json
+{
+    "priority_summary": {
+        "low": 25,
+        "medium": 10,
+        "high": 0
+    }
+}
+```
+
+**By Assignee**
+
+```http
+GET /chart?type=assignee
+```
+
+```json
+{
+    "assignee_summary": {
+        "John Doe": {
+            "total_todos": 10,
+            "total_pending_todos": 3,
+            "total_timetracked_completed_todos": 120
+        },
+        "Jane Smith": {
+            "total_todos": 12,
+            "total_pending_todos": 1,
+            "total_timetracked_completed_todos": 250
+        }
+    }
+}
+```
+
+---
+
+## Running Tests
+
+To run the test suite:
+
+```bash
+php artisan test
+```
+
+For a more readable output:
+
+```bash
+php artisan test --testdox
+```
