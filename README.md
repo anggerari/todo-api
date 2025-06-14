@@ -1,7 +1,5 @@
 # Todo List API
 
----
-
 ## Getting Started
 
 ### Prerequisites
